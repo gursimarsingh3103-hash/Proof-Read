@@ -31,7 +31,7 @@ if st.button("Proofread & Improve"):
                 """
                 
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=prompt
                 )
                 

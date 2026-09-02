@@ -27,14 +27,7 @@ if st.button("Proofread & Improve"):
         st.subheader("Polished Output")
         st.write(response.text)
       except Exception as e:
-        st.error(str(e))            except Exception as e:
-                msg = str(e)
-                if "503" in msg or "UNAVAILABLE" in msg:
-                    st.error("Gemini's servers are overloaded right now. Please try again shortly.")
-                elif "404" in msg or "NOT_FOUND" in msg:
-                    st.error("The selected Gemini model is no longer available. Try updating the MODEL variable in the code.")
-                else:
-                    st.error(f"{type(e).__name__}: {e}")
+        st.error(str(e))                    st.error(f"{type(e).__name__}: {e}")
                 with st.expander("Full error details"):
                     st.code(traceback.format_exc())                    client,
                     model="gemini-2.5-flash",

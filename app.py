@@ -27,14 +27,7 @@ if st.button("Proofread & Improve"):
         st.subheader("Polished Output")
         st.write(response.text)
       except Exception as e:
-        st.error(f"Error: {e}")                client = genai.Client(api_key=api_key)
-                response = generate_with_retry(
-                    client, model=MODEL,
-                    contents="Proofread and improve this text:\n\n" + draft_text,
-                )
-                st.subheader("Polished Output")
-                st.write(response.text)
-            except Exception as e:
+        st.error(str(e))            except Exception as e:
                 msg = str(e)
                 if "503" in msg or "UNAVAILABLE" in msg:
                     st.error("Gemini's servers are overloaded right now. Please try again shortly.")

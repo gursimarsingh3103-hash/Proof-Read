@@ -36,6 +36,25 @@ if st.button("Proofread & Improve"):
         )
 
         response = None
+        for attempt in range(5):
+          try:
+            response = client.models.generate_content(
+                model="gemini-3.5-flash", contents=prompt
+            )
+            break
+          except Exception as api_err:
+            if "503" in str(api_err) and attempt < 4:
+              time.sleep(3)
+              continue
+            else:
+              raise api_err
+
+        st.subheader("Polished Output")
+        st.write(response.text)
+
+      except Exception as e:
+        st.error(f"An error occurred: {e}")
+        response = None
         for attempt in range(3):
           try:
             response = client.models.generate_content(

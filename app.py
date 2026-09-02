@@ -20,12 +20,11 @@ if st.button("Proofread & Improve"):
             try:
                 client = genai.Client(api_key=api_key)
                 
-                # Built-in retry mechanism to handle temporary 503 traffic spikes smoothly
                 response = None
                 for attempt in range(4):
                     try:
                         response = client.models.generate_content(
-                            model="gemini-3.7-flash",
+                            model="gemini-2.5-flash",
                             contents="Proofread and improve this text:\n\n" + draft_text
                         )
                         break

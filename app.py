@@ -24,7 +24,7 @@ if st.button("Proofread & Improve"):
                 for attempt in range(4):
                     try:
                         response = client.models.generate_content(
-                            model="gemini-2.5-flash",
+                            model="gemini-3.6-flash",
                             contents="Proofread and improve this text:\n\n" + draft_text
                         )
                         break

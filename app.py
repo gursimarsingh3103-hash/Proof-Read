@@ -1,4 +1,3 @@
-import time
 from google import genai
 import streamlit as st
 
@@ -19,22 +18,25 @@ draft_text = st.text_area("", height=250)
 
 if st.button("Proofread & Improve"):
   if not api_key:
-    st.error("Please enter your Google Gemini API key in the sidebar.")
+    st.error("Please enter your Google Gemini API Key in the sidebar.")
   elif not draft_text.strip():
     st.error("Please paste some text to proofread.")
   else:
     with st.spinner("AI is proofreading your text..."):
       try:
         client = genai.Client(api_key=api_key)
-
-        prompt = (
-            "You are an expert academic editor and proofreader. Carefully"
-            " review the following text for grammar, spelling, clarity,"
-            " punctuation, and professional flow. Provide a polished version"
-            " followed by a brief summary of key improvements made:\n\n"
-            f"{draft_text}"
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=(
+                "You are an expert academic editor. Review the following text"
+                " for grammar, spelling, and clarity, and provide a polished"
+                f" version:\n\n{draft_text}"
+            ),
         )
-
+        st.subheader("Polished Output")
+        st.write(response.text)
+      except Exception as e:
+        st.error(f"An error occurred: {e}")
         response = None
         for attempt in range(3):
           try:

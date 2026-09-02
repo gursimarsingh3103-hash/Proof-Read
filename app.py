@@ -1,4 +1,3 @@
-import time
 from google import genai
 import streamlit as st
 
@@ -35,6 +34,15 @@ if st.button("Proofread & Improve"):
             f"{draft_text}"
         )
 
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", contents=prompt
+        )
+
+        st.subheader("Polished Output")
+        st.write(response.text)
+
+      except Exception as e:
+        st.error(f"An error occurred: {e}")
         response = None
         for attempt in range(5):
           try:

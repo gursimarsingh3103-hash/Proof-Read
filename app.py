@@ -11,6 +11,8 @@ api_key = st.sidebar.text_input(
 st.title("📝 My AI Proofreader & Editor")
 draft_text = st.text_area("Paste your assignment draft here:", height=250)
 
+MODEL = "gemini-flash-latest"  # auto-updates to Google's current Flash model
+
 def generate_with_retry(client, model, contents, max_retries=3):
     last_error = None
     for attempt in range(max_retries):
@@ -19,9 +21,9 @@ def generate_with_retry(client, model, contents, max_retries=3):
         except Exception as e:
             last_error = e
             if "503" in str(e) or "UNAVAILABLE" in str(e):
-                time.sleep(2 * (attempt + 1))  # wait a bit longer each retry
+                time.sleep(2 * (attempt + 1))
                 continue
-            raise  # not a 503 - don't retry, raise immediately
+            raise
     raise last_error
 
 if st.button("Proofread & Improve"):
@@ -34,7 +36,21 @@ if st.button("Proofread & Improve"):
             try:
                 client = genai.Client(api_key=api_key)
                 response = generate_with_retry(
-                    client,
+                    client, model=MODEL,
+                    contents="Proofread and improve this text:\n\n" + draft_text,
+                )
+                st.subheader("Polished Output")
+                st.write(response.text)
+            except Exception as e:
+                msg = str(e)
+                if "503" in msg or "UNAVAILABLE" in msg:
+                    st.error("Gemini's servers are overloaded right now. Please try again shortly.")
+                elif "404" in msg or "NOT_FOUND" in msg:
+                    st.error("The selected Gemini model is no longer available. Try updating the MODEL variable in the code.")
+                else:
+                    st.error(f"{type(e).__name__}: {e}")
+                with st.expander("Full error details"):
+                    st.code(traceback.format_exc())                    client,
                     model="gemini-2.5-flash",
                     contents="Proofread and improve this text:\n\n" + draft_text,
                 )

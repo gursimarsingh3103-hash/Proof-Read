@@ -1,40 +1,60 @@
-import streamlit as st
+import time
 from google import genai
+import streamlit as st
 
-st.set_page_config(page_title="AI Proofreader", page_icon="📝")
+st.set_page_config(page_title="AI Proofreader & Editor", page_icon="📝")
+
+st.sidebar.header("Settings")
+api_key = st.sidebar.text_input(
+    "Enter Google Gemini API Key:", type="password"
+)
+st.sidebar.markdown(
+    "[Get an API key here](https://aistudio.google.com/app/apikey)"
+)
+
 st.title("📝 My AI Proofreader & Editor")
 
-with st.sidebar:
-    st.header("Settings")
-    api_key = st.text_input("Enter Google Gemini API Key:", type="password")
-    st.markdown("[Get an API key here](https://aistudio.google.com/app/apikey)")
-
-draft_text = st.text_area("Paste your assignment draft here:", height=250)
+st.markdown("Paste your assignment draft here:")
+draft_text = st.text_area("", height=250)
 
 if st.button("Proofread & Improve"):
-    if not api_key:
-        st.warning("Please enter your API key in the sidebar.")
-    elif not draft_text:
-        st.warning("Please paste some text to proofread.")
-    else:
-        with st.spinner("Analyzing your text..."):
-            try:
-                client = genai.Client(api_key=api_key)
-                
-                prompt = f"""
-                Act as an expert academic editor. Review the following text for grammar, punctuation, and clarity.
-                1. Provide a polished, academic version of the text.
-                2. Provide a bulleted list of the specific vocabulary replacements you made and explain why they improve the flow.
+  if not api_key:
+    st.error("Please enter your Google Gemini API key in the sidebar.")
+  elif not draft_text.strip():
+    st.error("Please paste some text to proofread.")
+  else:
+    with st.spinner("AI is proofreading your text..."):
+      try:
+        client = genai.Client(api_key=api_key)
 
-                Draft:
-                {draft_text}
-                """
-                
-                response = client.models.generate_content(
-                    model="gemini-3.7-flash",
-                    contents=prompt
-                )
-                
+        prompt = (
+            "You are an expert academic editor and proofreader. Carefully"
+            " review the following text for grammar, spelling, clarity,"
+            " punctuation, and professional flow. Provide a polished version"
+            " followed by a brief summary of key improvements made:\n\n"
+            f"{draft_text}"
+        )
+
+        # Retry loop to handle temporary 503 server overloads gracefully
+        response = None
+        for attempt in range(3):
+          try:
+            response = client.models.generate_content(
+                model="gemini-3.7-flash", contents=prompt
+            )
+            break
+          except Exception as api_err:
+            if "503" in str(api_err) and attempt < 2:
+              time.sleep(2)  # Wait 2 seconds before retrying
+              continue
+            else:
+              raise api_err
+
+        st.subheader("Polished Output:")
+        st.write(response.text)
+
+      except Exception as e:
+        st.error(f"An error occurred: {e}")                
                 st.subheader("Results")
                 st.write(response.text)
                 

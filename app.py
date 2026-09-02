@@ -7,34 +7,27 @@ st.sidebar.header("Settings")
 api_key = st.sidebar.text_input(
     "Enter Google Gemini API Key:", type="password"
 )
-st.sidebar.markdown(
-    "[Get an API key here](https://aistudio.google.com/app/apikey)"
-)
 
 st.title("📝 My AI Proofreader & Editor")
-
-st.markdown("Paste your assignment draft here:")
-draft_text = st.text_area("", height=250)
+draft_text = st.text_area("Paste your assignment draft here:", height=250)
 
 if st.button("Proofread & Improve"):
   if not api_key:
-    st.error("Please enter your Google Gemini API Key in the sidebar.")
+    st.error("Please enter your API key in the sidebar.")
   elif not draft_text.strip():
-    st.error("Please paste some text to proofread.")
+    st.error("Please paste some text.")
   else:
-    with st.spinner("AI is proofreading your text..."):
+    with st.spinner("Proofreading..."):
       try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
             model="gemini-3.6-flash",
-            contents=(
-                "You are an expert academic editor. Review the following text"
-                " for grammar, spelling, and clarity, and provide a polished"
-                f" version:\n\n{draft_text}"
-            ),
+            contents=f"Proofread and improve this text:\n\n{draft_text}",
         )
         st.subheader("Polished Output")
         st.write(response.text)
+      except Exception as e:
+        st.error(f"Error: {e}")        st.write(response.text)
       except Exception as e:
         st.error(f"An error occurred: {e}")
         response = None

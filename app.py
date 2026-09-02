@@ -1,3 +1,4 @@
+import time
 from google import genai
 import streamlit as st
 
@@ -18,11 +19,24 @@ if st.button("Proofread & Improve"):
         with st.spinner("Proofreading..."):
             try:
                 client = genai.Client(api_key=api_key)
-                response = client.models.generate_content(
-                    model='gemini-3.6-flash',
-                    contents="Proofread and improve this text:\n\n" + draft_text
-                )
+                
+                # Built-in retry mechanism to handle temporary 503 traffic spikes smoothly
+                response = None
+                for attempt in range(4):
+                    try:
+                        response = client.models.generate_content(
+                            model="gemini-3.7-flash",
+                            contents="Proofread and improve this text:\n\n" + draft_text
+                        )
+                        break
+                    except Exception as api_err:
+                        if "503" in str(api_err) and attempt < 3:
+                            time.sleep(2)
+                            continue
+                        else:
+                            raise api_err
+
                 st.subheader("Polished Output")
                 st.write(response.text)
             except Exception as e:
-                st.error(str(e))
+                st.error(f"Error: {e}")
